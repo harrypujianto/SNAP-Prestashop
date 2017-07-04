@@ -21,6 +21,13 @@ class MidtransPaySuccessModuleFrontController extends ModuleFrontController
 		$status = 'success';
 
 
+		// If async payment denied (CIMB, klikpay, etc), redir to failure page
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+			parse_str(file_get_contents("php://input"), $data);
+			if (json_decode(urldecode($data['response']),true)['transaction_status'] == 'deny') { 
+				Tools::redirect( $this->context->link->getModuleLink('midtranspay','failure').'?&status_code=202' ); exit();
+			}
+		};
 		$this->context->smarty->assign(array(
 			'status' => $status,
 			'this_path' => $this->module->getPathUri(),
